@@ -914,14 +914,12 @@ def integral(requestContext, seriesList):
   """
   results = []
   for series in seriesList:
-    newValues = []
+    newValues = [None]*len(series)
     current = 0.0
-    for val in series:
-      if val is None:
-        newValues.append(None)
-      else:
+    for idx, val in enumerate(series):
+      if val is not None:
         current += val
-        newValues.append(current)
+        newValues[idx] = current
     newName = "integral(%s)" % series.name
     newSeries = TimeSeries(newName, series.start, series.end, series.step, newValues)
     newSeries.pathExpression = newName
