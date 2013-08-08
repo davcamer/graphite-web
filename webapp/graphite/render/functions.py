@@ -1245,14 +1245,10 @@ def logarithm(requestContext, seriesList, base=10):
   """
   results = []
   for series in seriesList:
-    newValues = []
-    for val in series:
-      if val is None:
-        newValues.append(None)
-      elif val <= 0:
-        newValues.append(None)
-      else:
-        newValues.append(math.log(val, base))
+    newValues = [None] * len(series)
+    for i, val in enumerate(series):
+      if val > 0:
+        newValues[i] = math.log(val, base)
     newName = "log(%s, %s)" % (series.name, base)
     newSeries = TimeSeries(newName, series.start, series.end, series.step, newValues)
     newSeries.pathExpression = newName
