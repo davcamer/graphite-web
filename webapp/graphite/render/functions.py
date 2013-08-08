@@ -2657,11 +2657,8 @@ def sinFunction(requestContext, name, amplitude=1):
   step = 60
   delta = timedelta(seconds=step)
   when = requestContext["startTime"]
-  values = []
-
-  while when < requestContext["endTime"]:
-    values.append(math.sin(time.mktime(when.timetuple()))*amplitude)
-    when += delta
+  rawTimes = range(requestContext["startTime"], requestContext["endTime"], delta)
+  values = [math.sin(time.mktime(t.timetuple()))*amplitude for t in rawTimes]
 
   return [TimeSeries(name,
             int(time.mktime(requestContext["startTime"].timetuple())),
