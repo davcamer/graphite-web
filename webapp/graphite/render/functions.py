@@ -2492,8 +2492,9 @@ def summarize(requestContext, seriesList, intervalString, func='sum', alignToFro
       newStart = series.start - (series.start % interval)
       newEnd = series.end - (series.end % interval) + interval
 
-    newValues = []
-    for timestamp in range(newStart, newEnd, interval):
+    timestamps = range(newStart, newEnd, interval)
+    newValues = [None] * len(timestamps)
+    for i, timestamp in enumerate(timestamps):
       if alignToFrom:
         newEnd = timestamp
         bucketInterval = int((timestamp - series.start) / interval)
@@ -2504,17 +2505,15 @@ def summarize(requestContext, seriesList, intervalString, func='sum', alignToFro
 
       if bucket:
         if func == 'avg':
-          newValues.append( float(sum(bucket)) / float(len(bucket)) )
+          newValues[i] = float(sum(bucket)) / float(len(bucket))
         elif func == 'last':
-          newValues.append( bucket[len(bucket)-1] )
+          newValues[i] = bucket[len(bucket)-1]
         elif func == 'max':
-          newValues.append( max(bucket) )
+          newValues[i] = max(bucket)
         elif func == 'min':
-          newValues.append( min(bucket) )
+          newValues[i] = min(bucket)
         else:
-          newValues.append( sum(bucket) )
-      else:
-        newValues.append( None )
+          newValues[i] = sum(bucket)
 
     if alignToFrom:
       newEnd += interval
