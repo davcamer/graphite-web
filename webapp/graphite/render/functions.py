@@ -2628,11 +2628,8 @@ def timeFunction(requestContext, name):
   step = 60
   delta = timedelta(seconds=step)
   when = requestContext["startTime"]
-  values = []
-
-  while when < requestContext["endTime"]:
-    values.append(time.mktime(when.timetuple()))
-    when += delta
+  rawTimes = range(requestContext["startTime"], requestContext["endTime"], delta)
+  values = [time.mktime(t.timetuple()) for t in rawTimes]
 
   series = TimeSeries(name,
             int(time.mktime(requestContext["startTime"].timetuple())),
