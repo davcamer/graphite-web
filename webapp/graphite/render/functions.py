@@ -761,14 +761,15 @@ def movingAverage(requestContext, seriesList, windowSize):
       newName = 'movingAverage(%s,"%s")' % (series.name, windowSize)
     else:
       newName = "movingAverage(%s,%s)" % (series.name, windowSize)
-    newSeries = TimeSeries(newName, series.start, series.end, series.step, [])
-    newSeries.pathExpression = newName
 
+    newValues = [None] * len(series)
     offset = len(bootstrap) - len(series)
     for i in range(len(series)):
       window = bootstrap[i + offset - windowPoints:i + offset]
-      newSeries.append(safeAvg(window))
+      newValues[i] = safeAvg(window)
 
+    newSeries = TimeSeries(newName, series.start, series.end, series.step, newValues)
+    newSeries.pathExpression = newName
     result.append(newSeries)
 
   return result
