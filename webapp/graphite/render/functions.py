@@ -838,14 +838,11 @@ def derivative(requestContext, seriesList):
   """
   results = []
   for series in seriesList:
-    newValues = []
+    newValues = [None] * len(series)
     prev = None
-    for val in series:
-      if None in (prev,val):
-        newValues.append(None)
-        prev = val
-        continue
-      newValues.append(val - prev)
+    for i, val in enumerate(series)):
+      if None not in (prev,val):
+        newValues[i] = val - prev
       prev = val
     newName = "derivative(%s)" % series.name
     newSeries = TimeSeries(newName, series.start, series.end, series.step, newValues)
