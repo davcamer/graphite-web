@@ -1850,11 +1850,11 @@ def holtWintersAnalysis(series):
   intercept = 0
   slope = 0
   pred = 0
-  intercepts = list()
-  slopes = list()
-  seasonals = list()
-  predictions = list()
-  deviations = list()
+  intercepts = [None] * len(series)
+  slopes = [0] * len(series)
+  seasonals = [0] * len(series)
+  predictions = [None] * len(series)
+  deviations = [0] * len(series)
 
   def getLastSeasonal(i):
     j = i - season_length
@@ -1877,11 +1877,7 @@ def holtWintersAnalysis(series):
     if actual is None:
       # missing input values break all the math
       # do the best we can and move on
-      intercepts.append(None)
-      slopes.append(0)
-      seasonals.append(0)
-      predictions.append(next_pred)
-      deviations.append(0)
+      predictions[i] = next_pred
       next_pred = None
       continue
 
@@ -1891,8 +1887,8 @@ def holtWintersAnalysis(series):
       # seed the first prediction as the first actual
       prediction = actual
     else:
-      last_intercept = intercepts[-1]
-      last_slope = slopes[-1]
+      last_intercept = intercepts[i-1]
+      last_slope = slopes[i-1]
       if last_intercept is None:
         last_intercept = actual
       prediction = next_pred
@@ -1908,11 +1904,11 @@ def holtWintersAnalysis(series):
     next_pred = intercept + slope + next_last_seasonal
     deviation = holtWintersDeviation(gamma,actual,prediction,last_seasonal_dev)
 
-    intercepts.append(intercept)
-    slopes.append(slope)
-    seasonals.append(seasonal)
-    predictions.append(prediction)
-    deviations.append(deviation)
+    intercepts[i] = intercept
+    slopes[i] = slope
+    seasonals[i] = seasonal
+    predictions[i] = prediction
+    deviations[i] = deviation
 
   # make the new forecast series
   forecastName = "holtWintersForecast(%s)" % series.name
@@ -1959,19 +1955,16 @@ def holtWintersConfidenceBands(requestContext, seriesList, delta=3):
     deviation = _trimBootstrap(analysis['deviations'], series)
     seriesLength = len(forecast)
     i = 0
-    upperBand = list()
-    lowerBand = list()
+    upperBand = [None] * seriesLength
+    lowerBand = [None] * seriesLength
     while i < seriesLength:
       forecast_item = forecast[i]
       deviation_item = deviation[i]
       i = i + 1
-      if forecast_item is None or deviation_item is None:
-        upperBand.append(None)
-        lowerBand.append(None)
-      else:
+      if forecast_item is not None and deviation_item is not None:
         scaled_deviation = delta * deviation_item
-        upperBand.append(forecast_item + scaled_deviation)
-        lowerBand.append(forecast_item - scaled_deviation)
+        upperBand[i] = forecast_item + scaled_deviation
+        lowerBand[i] = forecast_item - scaled_deviation
 
     upperName = "holtWintersConfidenceUpper(%s)" % series.name
     lowerName = "holtWintersConfidenceLower(%s)" % series.name
@@ -1995,16 +1988,12 @@ def holtWintersAberration(requestContext, seriesList, delta=3):
     confidenceBands = holtWintersConfidenceBands(requestContext, [series], delta)
     lowerBand = confidenceBands[0]
     upperBand = confidenceBands[1]
-    aberration = list()
+    aberration = [0] * len(series)
     for i, actual in enumerate(series):
-      if series[i] is None:
-        aberration.append(0)
-      elif series[i] > upperBand[i]:
-        aberration.append(series[i] - upperBand[i])
+      if series[i] > upperBand[i]:
+        aberration[i] = series[i] - upperBand[i]
       elif series[i] < lowerBand[i]:
-        aberration.append(series[i] - lowerBand[i])
-      else:
-        aberration.append(0)
+        aberration[i] = series[i] - lowerBand[i]
 
     newName = "holtWintersAberration(%s)" % series.name
     results.append(TimeSeries(newName, series.start, series.end
