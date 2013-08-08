@@ -2405,24 +2405,23 @@ def smartSummarize(requestContext, seriesList, intervalString, func='sum', align
         buckets[bucketInterval].append(value)
 
 
-    newValues = []
-    for timestamp in range(series.start, series.end, interval):
+    timestamps = range(series.start, series.end, interval)
+    newValues = [None] * len(timestamps)
+    for i, timestamp in enumerate(timestamps):
       bucketInterval = int((timestamp - series.start) / interval)
       bucket = buckets.get(bucketInterval, [])
 
       if bucket:
         if func == 'avg':
-          newValues.append( float(sum(bucket)) / float(len(bucket)) )
+          newValues[i] = float(sum(bucket)) / float(len(bucket))
         elif func == 'last':
-          newValues.append( bucket[len(bucket)-1] )
+          newValues[i] = bucket[len(bucket)-1]
         elif func == 'max':
-          newValues.append( max(bucket) )
+          newValues[i] = max(bucket)
         elif func == 'min':
-          newValues.append( min(bucket) )
+          newValues[i] = min(bucket)
         else:
-          newValues.append( sum(bucket) )
-      else:
-        newValues.append( None )
+          newValues[i] = sum(bucket)
 
     newName = "smartSummarize(%s, \"%s\", \"%s\")" % (series.name, intervalString, func)
     alignedEnd = series.start + (bucketInterval * interval) + interval
