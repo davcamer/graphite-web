@@ -869,23 +869,16 @@ def perSecond(requestContext, seriesList, maxValue=None):
   """
   results = []
   for series in seriesList:
-    newValues = []
+    newValues = [None] * len(series)
     prev = None
-    for val in series:
+    for i, val in enumerate(series):
       step = series.step
-      if None in (prev,val):
-        newValues.append(None)
-        prev = val
-        continue
-
-      diff = val - prev
-      if diff >= 0:
-        newValues.append(diff / step)
-      elif maxValue is not None and maxValue >= val:
-        newValues.append( ((maxValue - prev) + val  + 1) / step )
-      else:
-        newValues.append(None)
-
+      if None not in (prev,val):
+        diff = val - prev
+        if diff >= 0:
+          newValues[i] = diff / step
+        elif maxValue is not None and maxValue >= val:
+          newValues[i] = ((maxValue - prev) + val  + 1) / step
       prev = val
     newName = "perSecond(%s)" % series.name
     newSeries = TimeSeries(newName, series.start, series.end, series.step, newValues)
