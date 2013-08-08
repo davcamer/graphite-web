@@ -934,23 +934,16 @@ def nonNegativeDerivative(requestContext, seriesList, maxValue=None):
   results = []
 
   for series in seriesList:
-    newValues = []
+    newValues = [None] * len(series)
     prev = None
 
-    for val in series:
-      if None in (prev, val):
-        newValues.append(None)
-        prev = val
-        continue
-
-      diff = val - prev
-      if diff >= 0:
-        newValues.append(diff)
-      elif maxValue is not None and maxValue >= val:
-        newValues.append( (maxValue - prev) + val  + 1 )
-      else:
-        newValues.append(None)
-
+    for i, val in enumerate(series):
+      if None not in (prev, val):
+        diff = val - prev
+        if diff >= 0:
+          newValues[i] = diff
+        elif maxValue is not None and maxValue >= val:
+          newValues[i] = (maxValue - prev) + val  + 1
       prev = val
 
     newName = "nonNegativeDerivative(%s)" % series.name
