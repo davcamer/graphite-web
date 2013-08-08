@@ -2595,12 +2595,10 @@ def hitcount(requestContext, seriesList, intervalString, alignToInterval = False
         if end_mod > 0:
           buckets[end_bucket].append(value * end_mod)
 
-    newValues = []
-    for bucket in buckets:
+    newValues = [None] * len(buckets)
+    for i, bucket in enumerate(buckets):
       if bucket:
-        newValues.append( sum(bucket) )
-      else:
-        newValues.append(None)
+        newValues[i] = sum(bucket)
 
     newName = 'hitcount(%s, "%s"%s)' % (series.name, intervalString, alignToInterval and ", true" or "")
     newSeries = TimeSeries(newName, newStart, series.end, interval, newValues)
