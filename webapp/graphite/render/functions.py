@@ -572,18 +572,17 @@ def movingMedian(requestContext, seriesList, windowSize):
       newName = 'movingMedian(%s,"%s")' % (series.name, windowSize)
     else:
       newName = "movingMedian(%s,%d)" % (series.name, windowPoints)
-    newSeries = TimeSeries(newName, series.start, series.end, series.step, [])
-    newSeries.pathExpression = newName
 
+    newValues = [None] * len(series)
     offset = len(bootstrap) - len(series)
     for i in range(len(series)):
       window = bootstrap[i + offset - windowPoints:i + offset]
       nonNull = [v for v in window if v is not None]
       if nonNull:
         m_index = len(nonNull) / 2
-        newSeries.append(sorted(nonNull)[m_index])
-      else:
-        newSeries.append(None)
+        newValues[i] = sorted(nonNull)[m_index]
+    newSeries = TimeSeries(newName, series.start, series.end, series.step, newValues)
+    newSeries.pathExpression = newName
     result.append(newSeries)
 
   return result
