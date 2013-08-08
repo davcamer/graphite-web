@@ -977,15 +977,13 @@ def stacked(requestContext,seriesLists,stackName='__DEFAULT__'):
     totalStack = [];
   results = []
   for series in seriesLists:
-    newValues = []
-    for i in range(len(series)):
+    newValues = [None] * len(series)
+    for i, val in enumerate(series)):
       if len(totalStack) <= i: totalStack.append(0)
 
-      if series[i] is not None:
-        totalStack[i] += series[i]
-        newValues.append(totalStack[i])
-      else:
-        newValues.append(None)
+      if val is not None:
+        totalStack[i] += val
+        newValues[i] = totalStack[i]
 
     # Work-around for the case when legend is set
     if stackName=='__DEFAULT__':
